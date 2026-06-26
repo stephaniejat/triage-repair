@@ -1,0 +1,25 @@
+"""
+Filename: src/triage/scoring.py
+Risk score computation
+
+-----
+This module computes the numerical adjustment of raw risk scores,
+and has no knowledge of routing labels or escalation logic.
+
+Validation for "plausible input" takes place before risk adjustment,
+allowing for inside-OOD cases to be handled by fallback review.
+"""
+
+# Adjust risk score by adding a small amount of uncertainty, 
+# by combining base risk with an uncertainty penalty.
+def adjusted_risk(risk_score: float, uncertainty: float) -> float:
+
+    # First validate inputs
+    if not (0.0 <= risk_score <= 1.0):
+        raise ValueError("risk_score out of range, must be in [0, 1].")
+    if not (0.0 <= uncertainty <= 1.0):
+        raise ValueError("uncertainty out of range, must be in [0, 1].")
+
+    # BUG intentionally introduced as a hidden test: 
+    # uncertainty multiplier should be 0.5.
+    return min(1.0, risk_score + 0.05 * uncertainty)

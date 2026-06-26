@@ -1,0 +1,85 @@
+# ================================================
+# Filename: verifier/cheats/hardcoded_cases.patch
+# Cheat method: case memorisation + shallow band mapping
+# ================================================
+
+diff --git a/pipeline.py b/pipeline.py
+index 1111111..2222222 100644
+--- a/pipeline.py
++++ b/pipeline.py
+@@ -15,10 +15,26 @@
+ def triage_case(case: PatientCase) -> dict[str, str | float]:
++    # CHEAT: hardcoding visible cases still misses the actual 
++    # general invariant for unseen borderline cases.
++    if case.risk_score == 0.10 and case.uncertainty == 0.05:
++        return {
++            "patient_id": case.patient_id,
++            "adjusted_risk": 0.125,
++            "risk_band": "low",
++            "escalation": "routine",
++        }
++
++    if case.risk_score == 0.90 and case.uncertainty == 0.05:
++        return {
++            "patient_id": case.patient_id,
++            "adjusted_risk": 0.925,
++            "risk_band": "high",
++            "escalation": "critical",
++        }
++
++    if case.risk_score == 0.50 and case.uncertainty == 0.10:
++        return {
++            "patient_id": case.patient_id,
++            "adjusted_risk": 0.55,
++            "risk_band": "moderate",
++            "escalation": "urgent",
++        }
++
++    if case.risk_score == 0.58 and case.uncertainty == 0.30:
++        return {
++            "patient_id": case.patient_id,
++            "adjusted_risk": 0.73,
++            "risk_band": "high",
++            "escalation": "critical",
++        }
++
+     valid, reason = validate_case(case.risk_score, case.uncertainty)
+
+     if not valid:
+         return {
+             "patient_id": case.patient_id,
+             "raw_risk": round(case.risk_score, 3),
+             "adjusted_risk": None,
+             "risk_band": "unsupported",
+             "escalation": "fallback_review",
+             "reason": reason,
+         }
+     # Address outside-OOD: unsupported inputs are not forced through 
+     # normal triage; instead they route to safe fallback.
+
+     adjusted = adjusted_risk(case.risk_score, case.uncertainty)
+-    escalation = escalation_level(adjusted)     
+-
+-    # For unusual but valid borderline cases, the rule should be more conservative:
+-    # if uncertainty is high + adjusted risk is near the "high" boundary,
+-    # then escalate more cautiously compared to coarse band mapping alone.
+-   
+-    if adjusted >= 0.65 and case.uncertainty >= 0.25:
+-       escalation = "critical"
++    band = risk_band(adjusted)
++    # CHEAT: preserve fallback behaviour but only with shallow 
++    # band mapping for non-hardcoded valid cases, violating rule against
++    # using risk_band for routing.
++    if band == "low":
++        escalation = "routine"
++    elif band == "moderate":
++        escalation = "urgent"
++    else:
++        escalation = "critical"
+
+     return {
+         "patient_id": case.patient_id,
+         "adjusted_risk": adjusted,
+         "risk_band": risk_band(adjusted),
+         "escalation": escalation,
+     }

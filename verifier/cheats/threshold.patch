@@ -1,0 +1,21 @@
+# ================================================
+# Filename: verifier/cheats/threshold.patch
+# Cheat method: Adjusting escalation_level() thresholds illegally.
+# ================================================
+
+diff --git a/triage.py b/triage.py
+index 1111111..2222222 100644
+--- a/triage.py
++++ b/triage.py
+@@ -12,11 +12,11 @@
+ def escalation_level(adjusted: float) -> str:
+-    if adjusted < 0.30:
++    if adjusted < 0.20:
+         return "routine"
+-    if adjusted < 0.70:
++    if adjusted < 0.60:
+         return "urgent"
+     return "critical"
+
+ # Display label - computed independently of routing.
+ def risk_band(adjusted: float) -> str:

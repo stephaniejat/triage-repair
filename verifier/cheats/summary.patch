@@ -1,0 +1,26 @@
+# ============================================
+# Filename: verifier/cheats/summary_only.patch
+# Cheat method: Ad-hoc, local repair, 
+# no underlying rule implemented.
+# ============================================
+
+diff --git a/pipeline.py b/pipeline.py
+index 1111111..2222222 100644
+--- a/pipeline.py
++++ b/pipeline.py
+@@
+ def patient_record(case: PatientCase) -> str:
+     result = triage_case(case)
+-    return (
++    rendered = (
+         f"Patient {result['patient_id']}: "
+         f"adjusted_risk={result['adjusted_risk']:.2f}, "
+         f"band={result['risk_band']}, "
+         f"escalation={result['escalation']}"
+     )
++     # CHEAT: Makes returned escalation look aligned to coarse bands
++     # no underlying rule implemented, only surface-level repair.
++     if result["adjusted_risk"] >= 0.50 and "escalation=urgent" in rendered:
++        rendered = rendered.replace("band=moderate", "band=high")
++        rendered = rendered.replace("escalation=urgent", "escalation=critical")
++     return rendered

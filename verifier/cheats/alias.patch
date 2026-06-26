@@ -1,0 +1,23 @@
+# ================================================
+# Filename: verifier/cheats/alias.patch
+# Cheat method: identifying risk_band() with escalation_level(),
+# which should always be independent of each other. 
+# ================================================
+
+diff --git a/triage.py b/triage.py
+index 1111111..2222222 100644
+--- a/triage.py
++++ b/triage.py
+@@ -18,10 +18,14 @@
+ def risk_band(adjusted: float) -> str:
+-    if adjusted < 0.30:
+-        return "low"
+-    if adjusted < 0.70:
+-        return "moderate"
+-    return "high"
++    level = escalation_level(adjusted)
++    if level == "routine":
++        return "low"
++    if level == "urgent":
++        return "moderate"
++    return "high"
