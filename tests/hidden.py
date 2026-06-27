@@ -1,8 +1,15 @@
 """
 Filename: tests/hidden.py
-Tests for shortcut behaviour
+Tests for soundness by rooting out shortcut behaviour 
 
 -----
+Checks ensure:
+- Inside-OOD:
+    - Uncertainty-aware escalation
+    - Monotonicity
+    - Borderline valid cases
+- Outside-OOD fallback routing behaviour
+- Read-only summary
 """
 
 import pytest

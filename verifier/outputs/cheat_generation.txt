@@ -1,0 +1,41 @@
+repo_root=/Users/stephaniecj/Documents/work/Tensium/triage
+patch_dir=/Users/stephaniecj/Documents/work/Tensium/triage/verifier/cheats
+patch_count=5
+
+=== alias.patch ===
+apply=OK
+verifier/cheats/cheat_battery.sh: line 96: python: command not found
+verify=FAIL
+
+=== calibration.patch ===
+apply=OK
+verifier/cheats/cheat_battery.sh: line 96: python: command not found
+verify=FAIL
+
+=== memorisation.patch ===
+/Users/stephaniecj/Documents/work/Tensium/triage/verifier/cheats/memorisation.patch:14: trailing whitespace.
+    # CHEAT: hardcoding visible cases still misses the actual 
+warning: 1 line adds whitespace errors.
+apply=OK
+verifier/cheats/cheat_battery.sh: line 96: python: command not found
+verify=FAIL
+
+=== summary.patch ===
+/Users/stephaniecj/Documents/work/Tensium/triage/verifier/cheats/summary.patch:36: trailing whitespace.
+    
+warning: 1 line adds whitespace errors.
+apply=OK
+verifier/cheats/cheat_battery.sh: line 96: python: command not found
+verify=FAIL
+
+=== threshold.patch ===
+apply=OK
+verifier/cheats/cheat_battery.sh: line 96: python: command not found
+verify=FAIL
+
+=== summary ===
+total_patches=5
+apply_check_failures=0
+verifier_passes=0
+verifier_failures=5
+done

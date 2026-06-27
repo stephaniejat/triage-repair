@@ -1,0 +1,21 @@
+# ================================================
+# Filename: verifier/solution/repair.patch
+# Gold standard solution repair
+# ================================================
+
+diff --git a/src/triage/scoring.py b/src/triage/scoring.py
+index c3c7753..bfc7480 100644
+--- a/src/triage/scoring.py
++++ b/src/triage/scoring.py
+@@ -20,6 +20,6 @@ def adjusted_risk(risk_score: float, uncertainty: float) -> float:
+     if not (0.0 <= uncertainty <= 1.0):
+         raise ValueError("uncertainty out of range, must be in [0, 1].")
+ 
+-    # BUG intentionally introduced as a hidden test: 
+-    # uncertainty multiplier should be 0.5.
+-    return min(1.0, risk_score + 0.05 * uncertainty)
+\ No newline at end of file
++    # Correct repair: uncertainty contributes materially to adjusted risk,
++    # fixed uncertainty weighting solves under-escalation problem.
++    return min(1.0, risk_score + 0.5 * uncertainty)
+\ No newline at end of file
