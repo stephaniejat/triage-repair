@@ -1,7 +1,8 @@
+#!/usr/bin/env bash
 # ================================================
-# Filename: verifier/cheats/output/generate_patches.sh
-# Generate and validate cheat patches 
-# 
+# Filename: verifier/cheats/cheat_battery.sh
+# Generate and validate cheat patches
+#
 # -----
 # Workflow:
 # 1. Assume .patch files already exist in verifier/cheats/
@@ -12,8 +13,6 @@
 #    iv. log result in verifier/cheats/output/generation_log.txt
 #    v. restore repo
 # ================================================
-
-#!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,7 +40,10 @@ if [[ ! -f "verifier/verify.py" ]]; then
   exit 1
 fi
 
-mapfile -t PATCHES < <(find "$PATCH_DIR" -maxdepth 1 -type f -name '*.patch' ! -name 'gold_fix.patch' | sort)
+PATCHES=()
+while IFS= read -r patch; do
+  PATCHES+=("$patch")
+done < <(find "$PATCH_DIR" -maxdepth 1 -type f -name '*.patch' ! -name 'gold_fix.patch' | sort)
 
 # Ensure .patch file exists
 if [[ "${#PATCHES[@]}" -eq 0 ]]; then
