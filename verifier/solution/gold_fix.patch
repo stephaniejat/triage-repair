@@ -1,10 +1,10 @@
-diff --git a/scoring.py b/scoring.py
+diff --git a/src/triage/scoring.py b/src/triage/scoring.py
 index 1111111..2222222 100644
---- a/scoring.py
-+++ b/scoring.py
+--- a/src/triage/scoring.py
++++ b/src/triage/scoring.py
 @@ -1,18 +1,18 @@
  """
- Filename: src/triage/scoring.py
+ Filename: src/triage/src/triage/scoring.py
  Risk score computation
 
  -----
@@ -19,7 +19,7 @@ index 1111111..2222222 100644
  # by combining base risk with an uncertainty penalty.
  def adjusted_risk(risk_score: float, uncertainty: float) -> float:
 
-     # First validate inputs
+     # First validate inputs to distinguish inside/outside OOD
      if not (0.0 <= risk_score <= 1.0):
          raise ValueError("risk_score out of range, must be in [0, 1].")
      if not (0.0 <= uncertainty <= 1.0):

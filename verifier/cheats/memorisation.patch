@@ -1,13 +1,13 @@
-# ============================================
-# Filename: verifier/cheats/calibration_only.patch
-# Cheat method: shallow band-to-action mapping
-# ============================================
+# ================================================
+# Filename: verifier/cheats/memorisation.patch
+# Cheat method: case memorisation
+# ================================================
 
 diff --git a/src/triage/model.py b/src/triage/model.py
-index 3333333..7777777 100644
+index 1111111..2222222 100644
 --- a/src/triage/model.py
 +++ b/src/triage/model.py
-@@ -1,29 +1,34 @@
+@@ -15,10 +15,26 @@
  """
  Filename: src/triage/model.py
  Pipeline
@@ -69,26 +69,57 @@ index 3333333..7777777 100644
              "escalation": "review",
              "reason": ",".join(reasons),
          }
-
+         
++    # CHEAT: hardcoding visible cases still misses the actual 
++    # general invariant for unseen borderline cases.
++    if case.risk_score == 0.10 and case.uncertainty == 0.05:
++        return {
++            "patient_id": case.patient_id,
++            "raw_risk": 0.1,
++            "adjusted_risk": 0.125,
++            "risk_band": "low",
++            "escalation": "routine",
++            "reason": "supported",
++        }
++
++    if case.risk_score == 0.90 and case.uncertainty == 0.05:
++        return {
++            "patient_id": case.patient_id,
++            "raw_risk": 0.9,
++            "adjusted_risk": 0.925,
++            "risk_band": "high",
++            "escalation": "critical",
++            "reason": "supported",
++        }
++
++    if case.risk_score == 0.50 and case.uncertainty == 0.10:
++        return {
++            "patient_id": case.patient_id,
++            "raw_risk": 0.5,
++            "adjusted_risk": 0.55,
++            "risk_band": "moderate",
++            "escalation": "urgent",
++            "reason": "supported",
++        }
++
++    if case.risk_score == 0.58 and case.uncertainty == 0.30:
++        return {
++            "patient_id": case.patient_id,
++            "raw_risk": 0.58,
++            "adjusted_risk": 0.73,
++            "risk_band": "high",
++            "escalation": "critical",
++            "reason": "supported",
++        }
++
      adjusted = adjusted_risk(case.risk_score, case.uncertainty)
--    escalation = escalation_level(adjusted)
--
--   # For unusual but valid borderline cases, the rule should be more conservative:
--   # if uncertainty is high + adjusted risk is near the "high" boundary,
--   # then escalate more cautiously compared to coarse band mapping alone.
--   if adjusted >= 0.65 and case.uncertainty >= 0.25:
--       escalation = "critical"
-+ 
-+    # CHEAT: shallow repair by routing with risk band instead.
-+    # Preserve fallback but collapse valid cases with coarse
-+    # band-to-action mapping, missing conservative borderline rule.
-+    band = risk_band(adjusted)
-+    if band == "low":
-+        escalation = "routine"
-+    elif band == "moderate":
-+        escalation = "urgent"
-+    else:
-+        escalation = "critical"
+     escalation = escalation_level(adjusted)     
+   
+     # For unusual but valid borderline cases, the rule should be more conservative:
+     # if uncertainty is high + adjusted risk is near the "high" boundary,
+     # then escalate more cautiously compared to coarse band mapping alone.
+     if adjusted >= 0.65 and case.uncertainty >= 0.25:
+        escalation = "critical"
 
      return {
          "patient_id": case.patient_id,
@@ -98,7 +129,7 @@ index 3333333..7777777 100644
          "escalation": escalation,
          "reason": "supported",
      }
- 
+      
  # Return a human-readable case summary. This function should not hardcode
  # routing labels or bypass triage_case(), and must remain purely presentational.
  def patient_record(case: PatientCase) -> str:

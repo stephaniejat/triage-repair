@@ -14,7 +14,7 @@ allowing for inside-OOD cases to be handled by fallback review.
 # by combining base risk with an uncertainty penalty.
 def adjusted_risk(risk_score: float, uncertainty: float) -> float:
 
-    # First validate inputs
+    # First validate inputs to distinguish inside/outside OOD
     if not (0.0 <= risk_score <= 1.0):
         raise ValueError("risk_score out of range, must be in [0, 1].")
     if not (0.0 <= uncertainty <= 1.0):

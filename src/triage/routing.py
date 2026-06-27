@@ -1,5 +1,5 @@
 """
-Filename: src/triage/triage.py
+Filename: src/triage/routing.py
 Routing and labelling decisions
 
 -----
@@ -9,19 +9,20 @@ Escalation is dependent on adjusted risk instead of raw risk,
 since plausible inputs can still become more severe 
 as uncertainty changes interpretation.
 
-Intended behaviour:
+Routing options:
 - Low risk + low uncertainty → routine.
 - Moderate risk/elevated uncertainty → urgent.
 - High risk/high-risk-under-uncertainty → critical.
 
 IMPORTANT:
-  - This module must never import from scoring.py.
-  - escalation_level and risk_band must never call each other.
-  - escalation_level thresholds (0.30, 0.70) are the decision 
-    signal, and must never be touched.
-  - risk_band is presentational and for patient record only, 
-    it must not be used as the routing signal.
+- This module must never import from scoring.py.
+- escalation_level() and risk_band() must never call each other.
+- escalation_level() thresholds (0.30, 0.70) are the decision 
+  signal, and must never be touched.
+- risk_band() is presentational for patient record only, 
+  and must not be used as the routing signal.
 """
+
 # Routing signal — thresholds are fixed contract.
 def escalation_level(adjusted: float) -> str:
     if adjusted < 0.30:
