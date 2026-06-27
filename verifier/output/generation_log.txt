@@ -1,0 +1,30 @@
+repo_root=/Users/stephaniecj/Documents/work/Tensium/triage
+patch_dir=/Users/stephaniecj/Documents/work/Tensium/triage/verifier/cheats
+patch_count=5
+
+=== alias.patch ===
+error: corrupt patch at line 59
+apply_check=FAIL
+
+=== calibration.patch ===
+error: corrupt patch at line 118
+apply_check=FAIL
+
+=== memorisation.patch ===
+error: corrupt patch at line 149
+apply_check=FAIL
+
+=== summary.patch ===
+error: corrupt patch at line 116
+apply_check=FAIL
+
+=== threshold.patch ===
+error: corrupt patch at line 22
+apply_check=FAIL
+
+=== summary ===
+total_patches=5
+apply_check_failures=5
+verifier_passes=0
+verifier_failures=0
+done

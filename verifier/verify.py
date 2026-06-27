@@ -7,14 +7,13 @@ This verifier rejects shallow repairs which only pass visible behaviour,
 without fixing the real bug (i.e., does not amend the uncertainty
 multiplier in scoring.adjusted_risk from 0.05 to 0.5).
 
-Checks include:
-- gold-standard behavioural checks on representative cases;
-- protected threshold checks for escalation_level();
-- independence checks between risk_band() and escalation_level();
-- checks for presentation-only cheating in patient_record();
-- import isolation checks for triage.py;
-- input validation for adjusted_risk;
-- cheat-battery hooks so that adversarial patches can be run through the same verifier.
+File includes:
+- Path setup
+- Verifier helper functions, including logging function to write verifier 
+  output to verifier/outputs/verification.txt
+- Scoring layer 1: pass/fail checkers for soundness along four axes
+- Function to generate a cheat battery manifest
+- Scoring layer 2: gradient reward policy for RL learning signal
 """
 
 import ast
@@ -88,6 +87,14 @@ def assert_equal(actual: Any, expected: Any, msg: str) -> None:
 def assert_true(cond: bool, msg: str) -> None:
     if not cond:
         fail(msg)
+
+# Log verification output into file
+def log_verification(payload: dict[str, Any]) -> Path:
+    out_dir = ROOT / "verifier" / "outputs"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "verification.txt"
+    out_path.write_text(json.dumps(payload, indent=2, default=str) + "\n", encoding="utf-8")
+    return out_path
 
 # =========================================== 
 # Pass/fail checker functions
@@ -354,7 +361,7 @@ def score_axis(name: str, fn):
         }
 
 # Run all checks and compute score
-def run_all() -> dict[str, Any]:
+def run_verifier() -> dict[str, Any]:
     checks = {
         "visible_tests": score_axis("visible_tests", check_visible),
         "repair_effect": score_axis("repair_effect", check_repair),
@@ -409,10 +416,21 @@ def run_all() -> dict[str, Any]:
 # Execute verification
 # =========================================== 
 def main() -> int:
-    report = run_all()
-    status = "pass" if report["passed"] else "fail"
-    print(json.dumps({"status": status, "report": report}, indent=2, default=str))
-    return 0 if report["passed"] else 1
+    try:
+        report = run_verifier()
+        payload = {
+            "status": "pass" if report["passed"] else "fail",
+            "report": report,
+        }
+    except VerificationError as e:
+        payload = {
+            "status": "fail",
+            "error": str(e),
+        }
+
+    log_verification(payload)
+    print(json.dumps(payload, indent=2, default=str))
+    return 0 if payload["status"] == "pass" else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())

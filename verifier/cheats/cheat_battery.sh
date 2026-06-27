@@ -10,7 +10,7 @@
 #    i. ensure applies cleanly
 #    ii. apply
 #    iii. run verifier
-#    iv. log result in verifier/cheats/output/generation_log.txt
+#    iv. log result in verifier/output/cheat_generation.txt
 #    v. restore repo
 # ================================================
 set -euo pipefail
@@ -18,7 +18,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
 PATCH_DIR="$SCRIPT_DIR"
-LOG_FILE="$PATCH_DIR/output/generation_log.txt"
+LOG_FILE="$ROOT_DIR/verifier/output/cheat_generation.txt"
 
 # Ensure current location is repo root
 if [[ -z "${ROOT_DIR}" ]]; then
