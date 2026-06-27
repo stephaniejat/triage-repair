@@ -9,7 +9,7 @@ multiplier in scoring.adjusted_risk from 0.05 to 0.5).
 
 File includes:
 - Path setup
-- Verifier helper functions, including logging function to write verifier 
+- Verifier helper functions, including logging function to write tests and verifier 
   output to verifier/outputs/verification.txt
 - Scoring layer 1: pass/fail checkers for soundness along four axes
 - Function to generate a cheat battery manifest
@@ -88,7 +88,40 @@ def assert_true(cond: bool, msg: str) -> None:
     if not cond:
         fail(msg)
 
-# Log verification output into file
+# Log visible and hidden test outputs in verifier/outputs
+def log_pytest(test_path: Path, log_name: str) -> dict[str, Any]:
+    out_dir = ROOT / "verifier" / "outputs"    
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Run tests
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", str(test_path), "-q"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    # Log output
+    log_path = out_dir / log_name
+    combined = ""
+    if proc.stdout:
+        combined += proc.stdout
+    if proc.stderr:
+        if combined and not combined.endswith("\n"):
+            combined += "\n"
+        combined += proc.stderr
+
+    log_path.write_text(combined, encoding="utf-8")
+
+    return {
+        "path": str(test_path),
+        "log_path": str(log_path),
+        "returncode": proc.returncode,
+        "stdout": proc.stdout.strip(),
+        "stderr": proc.stderr.strip(),
+    }
+
+# Log verification output into verifier/outputs
 def log_verification(payload: dict[str, Any]) -> Path:
     out_dir = ROOT / "verifier" / "outputs"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -99,38 +132,15 @@ def log_verification(payload: dict[str, Any]) -> Path:
 # =========================================== 
 # Pass/fail checker functions
 # ===========================================
-# Visible axis:
+# Visible tests axis:
 # Check visible tests and require a clean pass
-def check_visible() -> dict[str, Any]:
-    visible_path = ROOT / "tests" / "visible.py"
+def visible_pytest() -> dict[str, Any]:
+    test_path = ROOT / "verifier" / "tests" / "visible.py"
+    assert_true(test_path.exists(), f"visible test file not found: {test_path}")
 
-    assert_true(visible_path.exists(), f"visible.py not found: {visible_path}")
-
-    # Run pytest
-    proc = subprocess.run(
-        [sys.executable, "-m", "pytest", str(visible_path), "-q"],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    )
-
-    stdout = proc.stdout.strip()
-    stderr = proc.stderr.strip()
-
-    assert_equal(
-        proc.returncode,
-        0,
-        "visible tests failed"
-        + (f"\nstdout:\n{stdout}" if stdout else "")
-        + (f"\nstderr:\n{stderr}" if stderr else ""),
-    )
-
-    return {
-        "path": str(visible_path),
-        "returncode": proc.returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-    } 
+    result = log_pytest(test_path, "visible.txt")
+    assert_equal(result["returncode"], 0, "visible tests failed")
+    return result
 
 # State consistency axis:
 # Check if repair results in gold-standard behaviour
@@ -225,6 +235,15 @@ def check_mutation() -> dict[str, Any]:
     return {"before": before, "after": after, "result": first}
 
 # Hidden robustness test axis:
+# Run hidden tests
+def hidden_pytest() -> dict[str, Any]:
+    test_path = ROOT / "verifier" / "tests" / "hidden.py"
+    assert_true(test_path.exists(), f"hidden test file not found: {test_path}")
+
+    result = log_pytest(test_path, "hidden.txt")
+    assert_equal(result["returncode"], 0, "hidden tests failed")
+    return result
+
 # Check refactoring bug trap
 def refactor_trap() -> dict[str, Any]:
     case = PatientCase("summary-1", 0.50, 0.80)
@@ -363,15 +382,17 @@ def score_axis(name: str, fn):
 # Run all checks and compute score
 def run_verifier() -> dict[str, Any]:
     checks = {
-        "visible_tests": score_axis("visible_tests", check_visible),
+        "visible_tests": score_axis("visible_tests", visible_pytest),
         "repair_effect": score_axis("repair_effect", check_repair),
         "threshold_contract": score_axis("threshold_contract", threshold_contract),
         "independence": score_axis("independence", check_independence),
+        "read_only": score_axis("read_only", check_mutation),
+        "hidden_tests": score_axis("hidden_tests", hidden_pytest),
         "refactor_trap": score_axis("refactor_trap", refactor_trap),
         "import_isolation": score_axis("import_isolation", import_isolation),
         "invalid_inputs": score_axis("invalid_inputs", invalid_inputs),
         "fallback_behaviour": score_axis("fallback_behaviour", check_fallback),
-        "read_only": score_axis("read_only", check_mutation),
+        
     }
 
     axes = {
@@ -383,7 +404,8 @@ def run_verifier() -> dict[str, Any]:
         ),
         "mutation_axis": checks["read_only"]["passed"],
         "robustness_axis": (
-            checks["refactor_trap"]["passed"]
+            checks["hidden_tests"]["passed"]
+            and checks["refactor_trap"]["passed"]
             and checks["import_isolation"]["passed"]
             and checks["invalid_inputs"]["passed"]
             and checks["fallback_behaviour"]["passed"]

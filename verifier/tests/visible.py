@@ -1,5 +1,5 @@
 """
-Filename: checks/visible.py
+Filename: verifier/tests/visible.py
 Superficial functionality tests
 
 ----

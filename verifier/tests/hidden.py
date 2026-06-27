@@ -1,5 +1,5 @@
 """
-Filename: tests/hidden.py
+Filename: verifier/tests/hidden.py
 Tests for soundness by rooting out shortcut behaviour 
 
 -----
