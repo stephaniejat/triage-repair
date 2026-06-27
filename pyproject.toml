@@ -23,4 +23,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 python_files = ["*.py"]
-testpaths = ["verifier/tests"]
+testpaths = ["tests"]
