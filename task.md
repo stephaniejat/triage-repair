@@ -3,9 +3,6 @@
 ### Set up
 `triage`, a small Python medical triage package was refactored and now behaves incorrectly.
 
-The repository consists of:
-
-
 ### Objective
 Your job is to repair the repository so that the triage pipeline is **internally consistent**, meaning:
 

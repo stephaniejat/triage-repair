@@ -360,7 +360,7 @@ def cheat_manifest() -> dict[str, str]:
     }
 
 # =========================================== 
-# Capability ladder via graded reward density using four scoring axes 
+# Capability ladder via graded reward density using 5 scoring axes 
 # =========================================== 
 # Run checks for each axis
 def score_axis(name: str, fn):
